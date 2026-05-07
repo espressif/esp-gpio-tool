@@ -1,7 +1,6 @@
 stages:
   - pre-check
   - test
-  - build
 
 # ------------------------------------------------------------------------------------------------------
 # WORKFLOW RULES (global rules for when a pipeline should be triggered or not)
@@ -89,41 +88,5 @@ codebase-tests:
   tags:
     - host_test
 # ------------------------------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------------------------------
-# Build executables
-# ------------------------------------------------------------------------------------------------------
-
-.build_template:
-  stage: build
-  needs: [] # Do not wait for previous stages
-  rules:
-    - if: '$CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH'
-  variables:
-    TARGETS: "esp_gpio_tool_cli/targets/"
-    RESOURCES: "esp_gpio_tool/resources/"
-  artifacts:
-    paths:
-      - dist/espins*
-  script:
-    - python -m pip install pyinstaller
-    - python -m pip install -e .
-    - python -m PyInstaller -F --icon=${RESOURCES}espressif-logo.ico --add-data="${TARGETS}*.yaml${SEPARATOR}${TARGETS}" -n espins-cli esp_gpio_tool_cli/__main__.py
-    - python -m PyInstaller -w -F --icon=${RESOURCES}espressif-logo.ico --add-data="${TARGETS}*.yaml${SEPARATOR}${TARGETS}" --add-data="${RESOURCES}*${SEPARATOR}${RESOURCES}" -n espins esp_gpio_tool/__main__.py
-
-linux-build:
-  extends: .build_template
-  image: python:3.10
-  tags:
-    - build
-  variables:
-    SEPARATOR: ":"
-
-windows-build:
-  extends: .build_template
-  tags:
-    - windows-build
-  variables:
-    SEPARATOR: ";"
-
+# Standalone executables are built in GitHub Actions (.github/workflows/build.yml).
 # ------------------------------------------------------------------------------------------------------
