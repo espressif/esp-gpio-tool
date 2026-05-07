@@ -1,11 +1,46 @@
-# ESP GPIO Tool
+<a href="https://www.espressif.com">
+    <img src="https://www.espressif.com/sites/all/themes/espressif/logo-black.svg" alt="Espressif logo" title="Espressif" align="right" height="20" />
+</a>
+
+<div align="center">
+    <h1>ESP GPIO Tool</h1>
+    <hr>
+    <a href="https://pypi.org/project/esp-gpio-tool/">
+        <img src="https://img.shields.io/pypi/v/esp-gpio-tool" alt="PyPI">
+    </a>
+    <a href="LICENSE">
+        <img src="https://img.shields.io/pypi/l/esp-gpio-tool" alt="License">
+    </a>
+    <a href="https://pypi.org/project/esp-gpio-tool/">
+        <img src="https://img.shields.io/pypi/pyversions/esp-gpio-tool" alt="Python Versions">
+    </a>
+    <hr>
+</div>
+
 
 **Welcome to the ESP GPIO Tool!**
 This repository is a Python-based, open-source package that is used for developing applications with Espressif's SoCs.
 
-It offers GPIO-related tools.
+It provides a few developer-facing tools around GPIO pin planning and validation:
 
-- **GPIO assignment checker**: Checks if used GPIOs are correctly assigned to peripherals.
+- **CLI (`espins-cli`)**: validate a YAML pin assignment, and inspect chip GPIO/peripheral capabilities.
+- **GUI (`espins`)**: a simple desktop UI for the checker.
+- **GPIO MCP server**: a MCP server that can be used by models to access the core functions.
+
+## Source of Truth (Datasheet/TRM)
+
+ESP GPIO Tool is meant to **help you get started faster** and catch common configuration mistakes. It is **not** a replacement for the chip's **datasheet** and **TRM**.
+
+- The **datasheet and TRM are authoritative**. Always verify pin capabilities, electrical characteristics, and peripheral signal routing against the official documentation.
+- Do **not** build production hardware solely based on information from this tool.
+- If you spot a mismatch vs datasheet/TRM, please **report it** so we can fix it.
+
+When reporting a mismatch, include:
+
+- Chip and tool version (`espins-cli --version` if applicable)
+- What you expected vs what the tool reports (copy/paste output if possible)
+- Datasheet/TRM reference (document name + section/page)
+- A minimal config snippet (YAML) or CLI command that reproduces the issue
 
 ---
 
@@ -21,9 +56,6 @@ It offers GPIO-related tools.
 - [API Usage](#api-usage)
   - [Get List of GPIOs and Functions](#get-list-of-gpios-and-functions)
   - [Run Check](#run-check)
-- [CI/CD Overview](#cicd-overview)
-  - [GitLab CI/CD](#gitlab-cicd)
-  - [GitHub Actions](#github-actions)
 - [CHANGELOG](#changelog)
 - [License](#license)
 - [Contributing](#contributing)
@@ -44,7 +76,18 @@ Clone the repository and install the Python package
 
 ## Documentation
 
-ESP GPIO tool currently supports checking of pin assignment for ESP32 using CLI and simple GUI.
+ESP GPIO tool supports checking of pin assignment using a CLI and a simple GUI.
+
+Supported chips (targets currently shipped in `esp_gpio_tool_cli/targets/`):
+
+- `esp32`
+- `esp32c2`
+- `esp32c3`
+- `esp32c6`
+- `esp32h2`
+- `esp32p4`
+- `esp32s2`
+- `esp32s3`
 
 ### AI Agent
 
@@ -203,23 +246,6 @@ out = run_check(config)
 # Output is provided as a list of messages
 print(out)
 ```
-
----
-
-## CI/CD Overview
-
-### GitLab CI/CD
-
-This project includes a basic GitLab CI configuration with the following jobs:
-
-- **Pre-commit**: Executes checks identical to local pre-commit hooks.
-- **Shared CI Danger**: A standard Espressif linting tool for merge requests.
-- **Pytest**: Runs tests and coverage, integrated with the GitLab UI.
-- **Pylint**: Lints code in accordance with Python best practices.
-
-### GitHub Actions
-
-- TBD
 
 ---
 
