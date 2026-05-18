@@ -2,7 +2,7 @@
 ---
 minimum_pre_commit_version: 3.3.0                        # Specifies the minimum version of pre-commit required for this configuration
 default_install_hook_types: [pre-commit,commit-msg]      # Default hook types to install if not specified in individual hooks
-default_stages: [commit]
+default_stages: [pre-commit]
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -15,39 +15,39 @@ repos:
         args: ['-f=lf']                                  # Forces files to use LF line endings
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.10
+    rev: v0.15.13
     hooks:
       - id: ruff-check                                   # Linter
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format                                  # Formatter (replaces Black)
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.17.1
+    rev: v2.1.0
     hooks:
     -   id: mypy                                         # Runs mypy for Python type checking
         additional_dependencies: ['types-PyYAML']
 
   - repo: https://github.com/espressif/conventional-precommit-linter
-    rev: v1.10.0
+    rev: v1.11.0
     hooks:
       - id: conventional-precommit-linter                # Lints commit messages for conventional format
         stages: [commit-msg]
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
+    rev: v2.4.2
     hooks:
       - id: codespell                                    # Code spell checker
         args: ["--write-changes"]
         additional_dependencies: [tomli]
 
   - repo: https://github.com/espressif/check-copyright/
-    rev: v1.1.1
+    rev: v1.1.2
     hooks:
       - id: check-copyright
         args: ['--config', 'check_copyright_config.yaml']
 
   - repo: https://github.com/lyz-code/yamlfix/
-    rev: 1.17.0
+    rev: 1.19.1
     hooks:
       - id: yamlfix
         files: esp_gpio_tool_cli/targets/.*\.yaml$
