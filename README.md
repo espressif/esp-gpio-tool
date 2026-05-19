@@ -78,16 +78,11 @@ Clone the repository and install the Python package
 
 ESP GPIO tool supports checking of pin assignment using a CLI and a simple GUI.
 
-Supported chips (targets currently shipped in `esp_gpio_tool_cli/targets/`):
+To print chip target names supported by the tool (and their SoC/package variants):
 
-- `esp32`
-- `esp32c2`
-- `esp32c3`
-- `esp32c6`
-- `esp32h2`
-- `esp32p4`
-- `esp32s2`
-- `esp32s3`
+```sh
+espins-cli targets
+```
 
 ### AI Agent
 
