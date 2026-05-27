@@ -1,0 +1,39 @@
+# Publish to PyPI when a GitHub Release is published (draft -> published).
+
+name: PyPI release
+
+on:
+  release:
+    types: [released]
+
+permissions:
+  id-token: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/esp-gpio-tool
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+
+      - name: Install build tooling
+        run: |
+          python -m pip install -U pip
+          python -m pip install -U build
+
+      - name: Build sdist and wheel
+        run: python -m build
+
+      - name: Publish to PyPI (trusted publishing)
+        uses: pypa/gh-action-pypi-publish@release/v1

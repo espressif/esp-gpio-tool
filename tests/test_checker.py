@@ -1,7 +1,12 @@
 # SPDX-FileCopyrightText: 2024-2026 Espressif Systems (Shanghai) CO LTD
 # SPDX-License-Identifier: Apache-2.0
-import pytest
+from typing import cast
 
+import pytest
+from click import Command
+from click.testing import CliRunner
+
+from esp_gpio_tool_cli.__main__ import main as espins_cli
 from esp_gpio_tool_cli.checker import run_check
 from esp_gpio_tool_cli.chip import SUPPORTED_CHIPS
 from esp_gpio_tool_cli.logger import Logger
@@ -725,3 +730,12 @@ def test_esp32p4_emac_rmii_invalid_ref_clk_pin() -> None:
     out = '\n'.join(run(config))
     # EMAC_RMII_CLK can only be on GPIO32, GPIO44, or GPIO50; GPIO33 is not allowed
     assert 'Error: Pin 33 does not support function EMAC_RMII_CLK.' in out
+
+
+def test_targets() -> None:
+    """Test the targets command"""
+    runner = CliRunner()
+    result = runner.invoke(cast(Command, espins_cli), ['targets'])
+    assert result.exit_code == 0
+    for chip in SUPPORTED_CHIPS:
+        assert chip in result.output

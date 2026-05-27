@@ -1,6 +1,6 @@
 [build-system]
     build-backend = "setuptools.build_meta"
-    requires      = ["setuptools-scm>=8.0", "setuptools>=64"]
+    requires      = ["setuptools>=64"]
 
 [project]
     authors = [
@@ -75,15 +75,14 @@
     changelog_merge_prerelease = true
     bump_message               = "change: Updated release version to v$new_version"
     version_files              = [
-        "esp_gpio_tool_cli/__init__.py:__version__"
+        "esp_gpio_tool_cli/__init__.py:__version__",
     ]
-
 
 [tool.setuptools.dynamic]
 version = {attr = "esp_gpio_tool_cli.__version__"}
 
 [tool.setuptools.packages]
-find = {exclude = ["test", "test.*"]}
+find = {exclude = ["test", "test.*", "tests", "tests.*", "dev", "dev.*"]}
 
 [tool.pytest.ini_options]
     addopts          = "-s --log-cli-level DEBUG --cov=esp_gpio_tool_cli --cov-report=term"

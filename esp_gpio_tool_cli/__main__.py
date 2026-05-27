@@ -36,6 +36,20 @@ def check(filename: str) -> None:
         raise SystemExit(1)
 
 
+@main.command()
+def targets() -> None:
+    """Print supported chip target names and SoC variants"""
+    console = Console()
+    table = Table(show_header=True, header_style='bold', box=box.ROUNDED)
+    table.add_column('Chip', style='cyan')
+    table.add_column('SoC variants', style='white')
+    for chip in SUPPORTED_CHIPS:
+        esp = ESP(chip)
+        socs = ', '.join(str(soc) for soc in esp.soc_list) or '—'
+        table.add_row(chip, socs)
+    console.print(table)
+
+
 @main.command(name='list-pins')
 @click.argument('chip', type=click.Choice(SUPPORTED_CHIPS), required=True)
 def list_pins(chip: str) -> None:

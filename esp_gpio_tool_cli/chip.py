@@ -14,7 +14,9 @@ from esp_gpio_tool_cli.peripheral import BasePeripheral
 from esp_gpio_tool_cli.pin import Pin
 
 CONFIG_DIR = os.path.join(os.path.dirname(__file__), 'targets/')
-SUPPORTED_CHIPS = [filename.split('.')[0] for filename in os.listdir(CONFIG_DIR)]
+SUPPORTED_CHIPS = sorted(
+    filename.removesuffix('.yaml') for filename in os.listdir(CONFIG_DIR) if filename.endswith('.yaml')
+)
 
 logger = Logger()
 
