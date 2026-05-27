@@ -109,6 +109,42 @@ class BasePeripheral:
             raise ValueError(f'Instance {instance} not found.')
         return list(set(self.filtered_pins.get(instance, [])) - set(self.optional_pins.get(instance, [])))
 
+    def _literal_pin_instances(self, pin: str) -> list[str]:
+        """Return instance keys for a literal pin without an instance placeholder."""
+        if r'\d' in self.common_prefix:
+            # if common prefix contains digit, use it as instance number
+            instance = re.search(r'\d', pin)
+            if instance:
+                return [instance.group()]
+        return [str(self.start_cnt)]
+
+    def _expand_numbered_placeholder(
+        self,
+        pins: dict[str, list[str]],
+        placeholder: str,
+        counts: int | dict[str, int],
+    ) -> dict[str, list[str]]:
+        """Expand placeholders like `{channel}` or `{data_width}` per instance."""
+        if not counts:
+            return pins
+
+        output: dict[str, list[str]] = {}
+        token = f'{{{placeholder}}}'
+        for instance, instance_pins in pins.items():
+            output[instance] = []
+            count = counts[instance] if isinstance(counts, dict) else counts
+            for pin in instance_pins:
+                if token in pin:
+                    output[instance].extend([pin.format(**{placeholder: str(i)}) for i in range(count)])
+                else:
+                    output[instance].append(pin)
+        return output
+
+    def _expand_data_width_pins(self, pins: dict[str, list[str]]) -> dict[str, list[str]]:
+        """Expand `{data_width}` up to the maximum supported mode per instance."""
+        widths = {instance: int(max(self.supported_modes.get(instance, [1]))) for instance in self.instances}
+        return self._expand_numbered_placeholder(pins, 'data_width', widths)
+
     def unwrap_pins(self, pins: list[str] | None) -> dict[str, list[str]]:
         """Convert wildcard pins to actual pins, e.g.
         - DAC_{count} -> {1: [DAC_1], 2: [DAC_2]]
@@ -119,35 +155,20 @@ class BasePeripheral:
         if pins is not None:
             # prepare output dict with empty lists per peripheral instance
             output = {i: [] for i in self.instances}
+            placeholder = f'{{{self._replace_keyword}}}'
             for pin in pins:
-                if f'{{{self._replace_keyword}}}' in pin:
-                    for i in self.instances:
+                if placeholder in pin:
+                    for instance in self.instances:
                         # replace wildcard with counter of peripheral instance
-                        output[i].append(pin.format(**{self._replace_keyword: str(i)}))
+                        output[instance].append(pin.format(**{self._replace_keyword: str(instance)}))
                 else:
-                    if r'\d' in self.common_prefix:
-                        # if common prefix contains digit, use it as instance number
-                        instance = re.search(r'\d', pin)
-                        if instance:
-                            output[instance.group()].append(pin)
-                            continue
-                    output[str(self.start_cnt)].append(pin)
+                    for instance in self._literal_pin_instances(pin):
+                        output[instance].append(pin)
         return output
 
     def unwrap_channels(self, channels: int | dict[str, int], pins: dict[str, list[str]]) -> dict[str, list[str]]:
         """Convert wildcard channels to actual channels"""
-        output: dict[str, list[str]] = {}
-        if not channels:
-            return pins
-        for instance in pins.keys():
-            output[instance] = []
-            channels_count = channels[instance] if isinstance(channels, dict) else channels
-            for pin in pins[instance]:
-                if '{channel}' in pin:
-                    output[instance].extend([pin.format(channel=str(i)) for i in range(channels_count)])
-                else:
-                    output[instance].append(pin)
-        return output
+        return self._expand_numbered_placeholder(pins, 'channel', channels)
 
     def set_mode(self, instance: str, mode: str) -> None:
         """Set mode of interface communication"""
@@ -258,23 +279,9 @@ class SPI(BasePeripheral):
                     out[instance] = pins[instance]  # no filtering needed
         return out
 
-    def unwrap_pins(self, pins: list[str] | None) -> dict[str, list[str]]:
-        """Convert wildcard pins to actual pins, e.g. {subname}D -> {SPI: [SPID], FSPI: [FSPID]]"""
-        output: dict[str, list[str]] = {}
-        if pins is not None:
-            # prepare output dict with empty lists per peripheral instance
-            output = {i: [] for i in self.instances}
-            for pin in pins:
-                if f'{{{self._replace_keyword}}}' in pin:
-                    for i in self.instances:
-                        # replace wildcard with counter of peripheral instance
-                        output[i].append(pin.format(**{self._replace_keyword: str(i)}))
-                else:
-                    for instance in self.instances:
-                        # for SPI instance match SPID but not SPI3D
-                        if re.match(rf'{instance}(?!\d).*', pin):
-                            output[str(instance)].append(pin)
-        return output
+    def _literal_pin_instances(self, pin: str) -> list[str]:
+        # For SPI instance match SPID but not SPI3D.
+        return [str(instance) for instance in self.instances if re.match(rf'{instance}(?!\d).*', pin)]
 
     def use(self, function: str, pin: Pin) -> None:
         """Check SPI specific limitations; first SPI instance is usually reserved for flash memory and PSRAM"""
@@ -460,17 +467,7 @@ class SDIO(BasePeripheral):
         return pins
 
     def _unwrap_data_pins(self) -> dict[str, list[str]]:
-        assigned_pins: dict[str, list[str]] = {}
-        for instance in self.instances:
-            width = int(max(self.supported_modes.get(instance, [1])))
-            assigned_pins[instance] = []
-            for pin in self._assigned_pins[instance]:
-                if '{data_width}' not in pin:
-                    assigned_pins[instance].append(pin)
-                    continue
-                # replace wildcard with all possible channels
-                assigned_pins[instance].extend([pin.format(data_width=str(i)) for i in range(width)])
-        return assigned_pins
+        return self._expand_data_width_pins(self._assigned_pins)
 
     def set_mode(self, instance: str, mode: str) -> None:
         super().set_mode(instance, mode)
@@ -523,17 +520,7 @@ class SDMMC(BasePeripheral):
         return pins
 
     def _unwrap_data_pins(self, orig_pins: dict[str, list[str]]) -> dict[str, list[str]]:
-        pins: dict[str, list[str]] = {}
-        for instance in self.instances:
-            width = int(max(self.supported_modes.get(instance, [1])))
-            pins[instance] = []
-            for pin in orig_pins[instance]:
-                if '{data_width}' not in pin:
-                    pins[instance].append(pin)
-                    continue
-                # replace wildcard with all possible channels
-                pins[instance].extend([pin.format(data_width=str(i)) for i in range(width)])
-        return pins
+        return self._expand_data_width_pins(orig_pins)
 
     def set_mode(self, instance: str, mode: str) -> None:
         super().set_mode(instance, mode)
@@ -572,19 +559,9 @@ class LEDC(BasePeripheral):
         self._universal_pins = self.unwrap_channels(kwargs.get('channels', 0), self._universal_pins)
         self.optional_pins = self.universal_pins  # all pins are optional
 
-    def unwrap_pins(self, pins: list[str] | None) -> dict[str, list[str]]:
-        """Single low-speed block uses instance 'LS', not '0', so literals map to that key."""
-        if pins is None:
-            return {}
-        out: dict[str, list[str]] = {}
-        for inst in self.instances:
-            out[inst] = []
-            for pin in pins:
-                if f'{{{self._replace_keyword}}}' in pin:
-                    out[inst].append(pin.format(**{self._replace_keyword: inst}))
-                else:
-                    out[inst].append(pin)
-        return out
+    def _literal_pin_instances(self, pin: str) -> list[str]:
+        """Single low-speed block uses instance 'LS', not '0', so literals map to named instances."""
+        return list(self.instances)
 
 
 class MCPWM(BasePeripheral):
@@ -787,39 +764,16 @@ class LCDCAM(BasePeripheral):
         elif isinstance(modes, dict):
             self.supported_modes = modes
         self.mode = {i: self.supported_modes[i][0] for i in self.instances}
-        self.unwrap_channels(kwargs.get('channels', 16), self._universal_pins)
+        self._universal_pins = self.unwrap_channels(kwargs.get('channels', 16), self._universal_pins)
 
-    def unwrap_pins(self, pins: list[str] | None) -> dict[str, list[str]]:
-        """Convert wildcard pins to actual pins, e.g. {subname}_PCLK -> {LCD: [LCD_PCLK], CAM: [CAM_PCLK]]"""
-        output: dict[str, list[str]] = {}
-        if pins is not None:
-            # prepare output dict with empty lists per peripheral instance
-            output = {i: [] for i in self.instances}
-            for pin in pins:
-                if f'{{{self._replace_keyword}}}' in pin:
-                    for i in self.instances:
-                        # replace wildcard with counter of peripheral instance
-                        output[i].append(pin.format(**{self._replace_keyword: str(i)}))
-                else:
-                    for instance in self.instances:
-                        if instance in pin:
-                            output[str(instance)].append(pin)
-        return output
+    def _literal_pin_instances(self, pin: str) -> list[str]:
+        return [str(instance) for instance in self.instances if instance in pin]
 
     def unwrap_channels(self, channels: dict[str, int] | int, pins: dict[str, list[str]]) -> dict[str, list[str]]:
         """Convert wildcard channels to actual channels, e.g.
         {subname}_DATA{{channel}} -> {LCD: [LCD_DATA0, LCD_DATA1... ]}
         """
-        if isinstance(channels, int):
-            channels = {i: channels for i in self.instances}
-        for instance, instance_val in self.universal_pins.items():
-            for pin in instance_val:
-                if '{channel}' not in pin:
-                    continue
-                # replace wildcard with all possible channels
-                self._universal_pins[instance].remove(pin)
-                self._universal_pins[instance].extend([pin.format(channel=str(i)) for i in range(channels[instance])])
-        return pins
+        return self._expand_numbered_placeholder(pins, 'channel', channels)
 
     @property
     def universal_pins(self) -> dict[str, list[str]]:
@@ -899,17 +853,7 @@ class PARLIO(BasePeripheral):
         return pins
 
     def _unwrap_data_pins(self) -> dict[str, list[str]]:
-        universal_pins: dict[str, list[str]] = {}
-        for instance in self.instances:
-            width = int(max(self.supported_modes.get(instance, [1])))
-            universal_pins[instance] = []
-            for pin in self._universal_pins[instance]:
-                if '{data_width}' not in pin:
-                    universal_pins[instance].append(pin)
-                    continue
-                # replace wildcard with all possible channels
-                universal_pins[instance].extend([pin.format(data_width=str(i)) for i in range(width)])
-        return universal_pins
+        return self._expand_data_width_pins(self._universal_pins)
 
     def set_mode(self, instance: str, mode: str) -> None:
         super().set_mode(instance, mode)
