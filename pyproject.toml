@@ -92,7 +92,8 @@ find = {exclude = ["test", "test.*", "tests", "tests.*", "dev", "dev.*"]}
     testpaths        = ["tests"]
 
 [tool.coverage.run]
-    omit = ["__*__.py", "*/tests/*", "esp_gpio_tool/*"]
+    source = ["esp_gpio_tool_cli"]
+    omit = ["__*__.py", "*/tests/*", "esp_gpio_tool/*", "esp_gpio_tool_cli/ai_agent/*"]
 
 [tool.yamlfix]
     line_length = 200
