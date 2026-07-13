@@ -20,7 +20,7 @@ repos:
         args: ['-f=lf']                                  # Forces files to use LF line endings
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.13
+    rev: v0.15.20
     hooks:
       - id: ruff-check                                   # Linter
         args: [--fix, --exit-non-zero-on-fix]
