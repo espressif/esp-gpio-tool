@@ -122,6 +122,17 @@ def test_output_notsupported() -> None:
     assert 'Error: Pin 36 does not support output mode.' in out
 
 
+def test_output_notsupported_esp32s2_gpio46() -> None:
+    # ESP32-S2 Series Datasheet, section 4.2.1.1: "Except for GPIO46 (input only),
+    # all digital IO pins are bi-directional"; Table 2-3 lists GPIO46 as type "I".
+    config = """
+    chip: esp32s2
+    46: OUTPUT
+    """
+    out = run(config)
+    assert 'Error: Pin 46 does not support output mode.' in out
+
+
 def test_I2S_clk() -> None:
     config = """
     chip: esp32
