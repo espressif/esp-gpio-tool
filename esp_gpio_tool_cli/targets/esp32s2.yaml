@@ -139,7 +139,7 @@ gpio:
   43: {power_domain: VDD3P3_CPU, functions: [U0TXD, CLK_OUT1], at_reset: PUP}
   44: {power_domain: VDD3P3_CPU, functions: [U0RXD, CLK_OUT2], at_reset: PUP}
   45: {power_domain: VDD3P3_CPU, functions: [], strapping: VDD_SPI Voltage select, at_reset: PDOWN}
-  46: {power_domain: VDD3P3_CPU, functions: [], strapping: UART print en/Low for Download Mode (ignored when GPIO0 is High), at_reset: PDOWN}
+  46: {power_domain: VDD3P3_CPU, functions: [], is_output: false, strapping: UART print en/Low for Download Mode (ignored when GPIO0 is High), at_reset: PDOWN}
 
 soc:
   ESP32-S2FH2: {reserved_pins: [33, 36, 35, 34, 32, 31]}  # quad FLASH
