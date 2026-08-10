@@ -17,18 +17,7 @@ workflow:
 # WORKFLOW VARIABLES (global variables available for all jobs in the pipeline)
 # ------------------------------------------------------------------------------------------------------
 variables:
-  PIP_CACHE_DIR: '$CI_PROJECT_DIR/.cache/pip'
-  GIT_CLEAN_FLAGS: '-ffdx -e .cache/' # Ensure cache isn't deleted when the repository is cleaned.
-# ------------------------------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------------------------------
-# WORKFLOW DEFAULTS (default configurations to all jobs unless overridden in the job's own definition)
-# ------------------------------------------------------------------------------------------------------
-default:
-  cache:
-    - key: pip-cache
-      paths:
-        - .cache/pip
+  PIP_NO_CACHE_DIR: '1'
 # ------------------------------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------------------------------
