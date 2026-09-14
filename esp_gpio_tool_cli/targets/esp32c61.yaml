@@ -65,17 +65,17 @@ peripheral:
     count: 1
     assigned_pins: ['SDIO{count}_CLK', 'SDIO{count}_CMD', 'SDIO{count}_DATA{{data_width}}']
     data_width: {'0': [1, 4]}
-  LEDC: # LED PWM
+  LEDC:  # LED PWM
     count: 1
     channels: 6
     universal_pins: ['LEDC_LS_SIG_OUT{channel}']
-  USBSERIALJTAG: # USB Serial/JTAG
+  USBSERIALJTAG:  # USB Serial/JTAG
     count: 1
     assigned_pins: [USB_D-, USB_D+]
-  XTAL32K: # external 32K crystal oscillator
+  XTAL32K:  # external 32K crystal oscillator
     count: 1
     assigned_pins: [XTAL_32K_P, XTAL_32K_N]
-  ANACOMP: # Analog PAD Voltage Comparator / Zero Crossing Detector (ZCD0/ZCD1)
+  ANACOMP:  # Analog PAD Voltage Comparator / Zero Crossing Detector (ZCD0/ZCD1)
     count: 1
     assigned_pins: [ANA_COMP0_PAD0, ANA_COMP0_PAD1]
 
