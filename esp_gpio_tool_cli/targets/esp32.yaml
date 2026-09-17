@@ -28,6 +28,7 @@ peripheral:
     count: 2
     channels: {'1': 8, '2': 10}
     assigned_pins: ['ADC{count}_CH{{channel}}']
+    wifi_conflict: true  # SAR ADC2 shared with Wi-Fi
   DAC:
     count: 2
     assigned_pins: ['DAC_{count}']
