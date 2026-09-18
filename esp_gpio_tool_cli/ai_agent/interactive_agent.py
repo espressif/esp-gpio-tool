@@ -294,11 +294,16 @@ def main(
     REQUIREMENTS: Optional initial requirements (e.g. "Temperature monitor with WiFi").
     If omitted, you will be prompted at startup.
     """
-    # On Windows, use ProactorEventLoop so MCP stdio client subprocess works reliably
+    # On Windows, use ProactorEventLoop so MCP stdio client subprocess works.
+    # Event-loop policies are deprecated in 3.14 and removed in 3.16; loop_factory is 3.12+.
+    run_kwargs: dict[str, t.Any] = {}
     if sys.platform == 'win32':
-        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+        if sys.version_info >= (3, 12):
+            run_kwargs['loop_factory'] = asyncio.ProactorEventLoop
+        else:
+            asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
     try:
-        asyncio.run(_async_main(requirements, verbose, model, confidence_threshold))
+        asyncio.run(_async_main(requirements, verbose, model, confidence_threshold), **run_kwargs)
     except KeyboardInterrupt:
         console.print('\n[yellow]👋 Session interrupted. Goodbye![/]')
     except SystemExit:
