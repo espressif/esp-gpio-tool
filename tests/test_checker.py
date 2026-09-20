@@ -144,6 +144,32 @@ def test_I2S_clk() -> None:
     assert 'Error: Pin 21 does not support CLK_OUT, which is required for I2S0_CLK.' in out
 
 
+def test_I2S_clk_on_clk_out_pin() -> None:
+    out = run_check(
+        {
+            'chip': 'esp32',
+            0: 'I2S0_CLK',
+            22: 'I2S0_WS',
+            23: 'I2S0_SD',
+        }
+    )
+
+    assert not any(message.startswith('Error:') for message in out)
+
+
+def test_I2S_assignment_without_assigned_pins() -> None:
+    out = run_check(
+        {
+            'chip': 'esp32c3',
+            3: 'I2S0_CLK',
+            10: 'I2S0_WS',
+            11: 'I2S0_SDA',
+        }
+    )
+
+    assert out == ['All checks passed.']
+
+
 def test_SPI_modes() -> None:
     config = """
     chip: esp32
