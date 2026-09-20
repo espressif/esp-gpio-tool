@@ -22,6 +22,26 @@ def run(config: str) -> list[str]:
     return out
 
 
+def test_repeated_logger_construction_preserves_state() -> None:
+    logger = Logger()
+    previous_output = logger.output
+    previous_unicode = logger._unicode
+
+    try:
+        logger.output = []
+        logger.use_unicode(False)
+        logger.note('buffered message')
+
+        repeated_logger = Logger()
+
+        assert repeated_logger is logger
+        assert repeated_logger._unicode is False
+        assert repeated_logger.get_output() == ['Note: buffered message']
+    finally:
+        logger.output = previous_output
+        logger.use_unicode(previous_unicode)
+
+
 def test_missing_chip() -> None:
     config = """
     36: ADC1_CH0
