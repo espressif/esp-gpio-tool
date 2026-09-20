@@ -8,6 +8,7 @@ from click.testing import CliRunner
 
 from esp_gpio_tool_cli.__main__ import main as espins_cli
 from esp_gpio_tool_cli.checker import run_check
+from esp_gpio_tool_cli.chip import ESP
 from esp_gpio_tool_cli.chip import SUPPORTED_CHIPS
 from esp_gpio_tool_cli.logger import Logger
 
@@ -95,6 +96,20 @@ def test_valid_config_multiple_functions() -> None:
         'Warning: Pin 3 has been used multiple times, reusing pins is not recommended. '
         'Assigned functions: LEDC_HS_SIG_OUT0, LEDC_HS_SIG_OUT1, RMT_SIG_IN0' in result
     )
+
+
+@pytest.mark.parametrize('chip', SUPPORTED_CHIPS)
+def test_jtag_signals_are_assignable_on_every_chip(chip: str) -> None:
+    esp = ESP(chip)
+    signals = ('MTCK', 'MTDO', 'MTMS', 'MTDI')
+    config: dict[str | int, str] = {'chip': chip}
+
+    for signal in signals:
+        matching_pins = [pin.pin for pin in esp.gpios.values() if signal in pin.functions]
+        assert matching_pins, f'{signal} is not assigned to a GPIO on {chip}'
+        config[matching_pins[0]] = signal
+
+    assert not any(message.startswith('Error:') for message in run_check(config))
 
 
 def test_invalid_pin_format() -> None:

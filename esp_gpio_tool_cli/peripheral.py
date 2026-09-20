@@ -614,6 +614,11 @@ class PCNT(BasePeripheral):
 class JTAG(BasePeripheral):
     """JTAG peripheral"""
 
+    def __init__(
+        self, count: int, assigned_pins: list[str] = None, universal_pins: list[str] = None, **kwargs: Any
+    ) -> None:
+        super().__init__(count, assigned_pins, universal_pins, common_prefix=r'(MTCK|MTDO|MTMS|MTDI)', **kwargs)
+
 
 class EMAC(BasePeripheral):
     """Ethernet MAC peripheral"""
