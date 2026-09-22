@@ -15,8 +15,11 @@ class Logger:
         return cls.instance
 
     def __init__(self) -> None:
+        if getattr(self, '_initialized', False):
+            return
         self.output = []
         self._unicode = True
+        self._initialized = True
 
     @classmethod
     def _del(cls) -> None:

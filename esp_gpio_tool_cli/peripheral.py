@@ -366,9 +366,11 @@ class I2S(BasePeripheral):
         super().__init__(count, assigned_pins, universal_pins)
 
     def check_pin_function(self, instance: str, function: str, pin: Pin) -> None:
-        if function.endswith('_CLK') and function in self.assigned_pins[instance]:
+        if function.endswith('_CLK') and function in self.assigned_pins.get(instance, []):
             if not any(fun.startswith('CLK_OUT') for fun in pin.functions):
                 raise ValueError(f'Pin {pin.pin} does not support CLK_OUT, which is required for {function}.')
+            return
+        super().check_pin_function(instance, function, pin)
 
 
 class LPI2S(LowPowerBase):
@@ -611,6 +613,11 @@ class PCNT(BasePeripheral):
 
 class JTAG(BasePeripheral):
     """JTAG peripheral"""
+
+    def __init__(
+        self, count: int, assigned_pins: list[str] = None, universal_pins: list[str] = None, **kwargs: Any
+    ) -> None:
+        super().__init__(count, assigned_pins, universal_pins, common_prefix=r'(MTCK|MTDO|MTMS|MTDI)', **kwargs)
 
 
 class EMAC(BasePeripheral):

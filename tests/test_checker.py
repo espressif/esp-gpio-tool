@@ -8,6 +8,7 @@ from click.testing import CliRunner
 
 from esp_gpio_tool_cli.__main__ import main as espins_cli
 from esp_gpio_tool_cli.checker import run_check
+from esp_gpio_tool_cli.chip import ESP
 from esp_gpio_tool_cli.chip import SUPPORTED_CHIPS
 from esp_gpio_tool_cli.logger import Logger
 
@@ -20,6 +21,26 @@ def run(config: str) -> list[str]:
     # newline to separate the output from test name
     print('\n' + '\n'.join(out))
     return out
+
+
+def test_repeated_logger_construction_preserves_state() -> None:
+    logger = Logger()
+    previous_output = logger.output
+    previous_unicode = logger._unicode
+
+    try:
+        logger.output = []
+        logger.use_unicode(False)
+        logger.note('buffered message')
+
+        repeated_logger = Logger()
+
+        assert repeated_logger is logger
+        assert repeated_logger._unicode is False
+        assert repeated_logger.get_output() == ['Note: buffered message']
+    finally:
+        logger.output = previous_output
+        logger.use_unicode(previous_unicode)
 
 
 def test_missing_chip() -> None:
@@ -75,6 +96,20 @@ def test_valid_config_multiple_functions() -> None:
         'Warning: Pin 3 has been used multiple times, reusing pins is not recommended. '
         'Assigned functions: LEDC_HS_SIG_OUT0, LEDC_HS_SIG_OUT1, RMT_SIG_IN0' in result
     )
+
+
+@pytest.mark.parametrize('chip', SUPPORTED_CHIPS)
+def test_jtag_signals_are_assignable_on_every_chip(chip: str) -> None:
+    esp = ESP(chip)
+    signals = ('MTCK', 'MTDO', 'MTMS', 'MTDI')
+    config: dict[str | int, str] = {'chip': chip}
+
+    for signal in signals:
+        matching_pins = [pin.pin for pin in esp.gpios.values() if signal in pin.functions]
+        assert matching_pins, f'{signal} is not assigned to a GPIO on {chip}'
+        config[matching_pins[0]] = signal
+
+    assert not any(message.startswith('Error:') for message in run_check(config))
 
 
 def test_invalid_pin_format() -> None:
@@ -142,6 +177,32 @@ def test_I2S_clk() -> None:
     """
     out = run(config)
     assert 'Error: Pin 21 does not support CLK_OUT, which is required for I2S0_CLK.' in out
+
+
+def test_I2S_clk_on_clk_out_pin() -> None:
+    out = run_check(
+        {
+            'chip': 'esp32',
+            0: 'I2S0_CLK',
+            22: 'I2S0_WS',
+            23: 'I2S0_SD',
+        }
+    )
+
+    assert not any(message.startswith('Error:') for message in out)
+
+
+def test_I2S_assignment_without_assigned_pins() -> None:
+    out = run_check(
+        {
+            'chip': 'esp32c3',
+            3: 'I2S0_CLK',
+            10: 'I2S0_WS',
+            11: 'I2S0_SDA',
+        }
+    )
+
+    assert out == ['All checks passed.']
 
 
 def test_SPI_modes() -> None:
