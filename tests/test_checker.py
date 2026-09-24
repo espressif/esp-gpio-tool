@@ -168,6 +168,25 @@ def test_output_notsupported_esp32s2_gpio46() -> None:
     assert 'Error: Pin 46 does not support output mode.' in out
 
 
+def test_adc2_wifi_warning() -> None:
+    config = """
+    chip: esp32s3
+    11: ADC2_CH0
+    """
+    out = run(config)
+    assert 'Warning: ADC2 cannot be used in combination with Wi-Fi.' in out
+
+
+def test_adc2_no_wifi_warning_without_wifi_conflict() -> None:
+    # ESP32-P4 has ADC2 but does not set ADC.wifi_conflict (SAR ADC2 is not shared with Wi-Fi).
+    config = """
+    chip: esp32p4
+    49: ADC2_CH0
+    """
+    out = run(config)
+    assert 'Warning: ADC2 cannot be used in combination with Wi-Fi.' not in out
+
+
 def test_I2S_clk() -> None:
     config = """
     chip: esp32

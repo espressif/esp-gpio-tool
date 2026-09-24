@@ -207,10 +207,12 @@ class ADC(BasePeripheral):
             self.channels = channels
         self._assigned_pins = self.unwrap_channels(self.channels, self._assigned_pins)
         self.optional_pins = self.assigned_pins  # all pins are optional
+        # Per-chip: SAR ADC2 is shared with Wi-Fi on some SoCs (see targets/*.yaml).
+        self.wifi_conflict = bool(kwargs.get('wifi_conflict', False))
 
     def use(self, function: str, pin: Pin) -> None:
         """Check ADC specific limitations"""
-        if function.startswith('ADC2') and not self.used['2']:
+        if function.startswith('ADC2') and self.wifi_conflict and not self.used['2']:
             logger.warn('ADC2 cannot be used in combination with Wi-Fi.')
         super().use(function, pin)
 

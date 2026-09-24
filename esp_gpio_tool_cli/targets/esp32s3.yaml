@@ -28,6 +28,7 @@ peripheral:
     count: 2
     channels: 10
     assigned_pins: ['ADC{count}_CH{{channel}}']
+    wifi_conflict: true  # SAR ADC2 shared with Wi-Fi
   UART:
     count: 3
     assigned_pins: [U0TXD, U0RXD, U0CTS, U0RTS, U1TXD, U1RXD, U1CTS, U1RTS]
