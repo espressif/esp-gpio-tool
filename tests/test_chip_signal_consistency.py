@@ -26,8 +26,6 @@ KNOWN_ORPHANS: dict[str, set[str]] = {
         'SUBSPIWP',
         # Differential clock output is not modelled by the SPI peripheral
         'SPICLK_DIFF',
-        # Only USB_OTG_RCV is declared by the peripherals
-        'USB_RCV',
     },
 }
 
