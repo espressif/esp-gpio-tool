@@ -193,25 +193,25 @@ gpio:
   33: {power_domain: VDD_IO_4, functions: [SPI2WP, EMAC_TX_EN]}  # GMAC_PHY_TXEN_PAD
   34: {power_domain: VDD_IO_4, functions: [SPI2IO4, EMAC_TXD0], strapping: JTAG Signal Source Control together with eFuses}  # GMAC_PHY_TXD0_PAD
   35: {power_domain: VDD_IO_4, functions: [SPI2IO5, EMAC_TXD1], strapping: Pull-up for SPI Boot and pull-down for Download Mode, at_reset: PUP}  # GMAC_PHY_TXD1_PAD
-  36: {power_domain: VDD_IO_4, functions: [SPI2IO6, EMAC_TXER], strapping: Pull-up for Joint Download Mode; Pull-down for SPI Download mode, at_reset: PDOWN}  # GMAC_PHY_TXER_PAD; This also controls ROM message printing
+  36: {power_domain: VDD_IO_4, functions: [SPI2IO6, EMAC_TX_ER], strapping: Pull-up for Joint Download Mode; Pull-down for SPI Download mode, at_reset: PDOWN}  # GMAC_PHY_TXER_PAD; This also controls ROM message printing
   37: {power_domain: VDD_IO_4, functions: [U0TXD, SPI2IO7], strapping: Pull-down for SPI Download Mode}
   38: {power_domain: VDD_IO_4, functions: [U0RXD, SPI2DQS], strapping: Pull-up for SPI Download Mode}
   39: {power_domain: VDD_IO_5, functions: [SDHOST_CDATA_10, EMAC_REF_50M_CLK]}  # SD1_CDATA0_PAD, REF_50M_CLK_PAD
   40: {power_domain: VDD_IO_5, functions: [SDHOST_CDATA_11, EMAC_TX_EN]}  # SD1_CDATA1_PAD, GMAC_PHY_TXEN_PAD
   41: {power_domain: VDD_IO_5, functions: [SDHOST_CDATA_12, EMAC_TXD0]}  # SD1_CDATA2_PAD, GMAC_PHY_TXD0_PAD
   42: {power_domain: VDD_IO_5, functions: [SDHOST_CDATA_13, EMAC_TXD1]}  # SD1_CDATA3_PAD, GMAC_PHY_TXD1_PAD
-  43: {power_domain: VDD_IO_5, functions: [SDHOST_CCLK_1, EMAC_TXER]}  # SD1_CCLK_PAD, GMAC_PHY_TXER_PAD
+  43: {power_domain: VDD_IO_5, functions: [SDHOST_CCLK_1, EMAC_TX_ER]}  # SD1_CCLK_PAD, GMAC_PHY_TXER_PAD
   44: {power_domain: VDD_IO_5, functions: [SDHOST_CCMD_1, EMAC_RMII_CLK]}  # SD1_CCMD_PAD, GMAC_RMII_CLK_PAD
   45: {power_domain: VDD_IO_5, functions: [SDHOST_CDATA_14, EMAC_RX_DV]}  # SD1_CDATA4_PAD, GMAC_PHY_RXDV_PAD
   46: {power_domain: VDD_IO_5, functions: [SDHOST_CDATA_15, EMAC_RXD0]}  # SD1_CDATA5_PAD, GMAC_PHY_RXD0_PAD
   47: {power_domain: VDD_IO_5, functions: [SDHOST_CDATA_16, EMAC_RXD1]}  # SD1_CDATA6_PAD, GMAC_PHY_RXD1_PAD
-  48: {power_domain: VDD_IO_5, functions: [SDHOST_CDATA_17, EMAC_RXER]}  # SD1_CDATA7_PAD, GMAC_PHY_RXER_PAD
+  48: {power_domain: VDD_IO_5, functions: [SDHOST_CDATA_17, EMAC_RX_ER]}  # SD1_CDATA7_PAD, GMAC_PHY_RXER_PAD
   49: {power_domain: VDD_IO_6, functions: [ADC2_CH0, EMAC_TX_EN]}  # GMAC_PHY_TXEN_PAD
   50: {power_domain: VDD_IO_6, functions: [ADC2_CH1, EMAC_RMII_CLK]}  # GMAC_RMII_CLK_PAD
   51: {power_domain: VDD_IO_6, functions: [ADC2_CH2, EMAC_RX_DV, ANA_COMP0_PAD0]}  # GMAC_PHY_RXDV_PAD, ANA_COMP0
   52: {power_domain: VDD_IO_6, functions: [ADC2_CH3, EMAC_RXD0, ANA_COMP0_PAD1]}  # GMAC_PHY_RXD0_PAD, ANA_COMP0
   53: {power_domain: VDD_IO_6, functions: [ADC2_CH4, EMAC_RXD1, ANA_COMP1_PAD0]}  # GMAC_PHY_RXD1_PAD, ANA_COMP1
-  54: {power_domain: VDD_IO_6, functions: [ADC2_CH5, EMAC_RXER, ANA_COMP1_PAD1]}  # GMAC_PHY_RXER_PAD, ANA_COMP1
+  54: {power_domain: VDD_IO_6, functions: [ADC2_CH5, EMAC_RX_ER, ANA_COMP1_PAD1]}  # GMAC_PHY_RXER_PAD, ANA_COMP1
 
 soc:
   ESP32-P4NRW16X: {}

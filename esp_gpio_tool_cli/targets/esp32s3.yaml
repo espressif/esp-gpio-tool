@@ -95,10 +95,16 @@ peripheral:
   USBOTG:  # Full Speed USB OTG
     count: 1
     # Part "OTG" is not specified by the datasheet, it is only for the later resolution by the checker
+    # USB_OTG_EXT_* and USB_OTG_RCV are the external USB PHY (VP/VM/RCV/OEN/VPO/VMO)
+    # TODO: model internal vs external PHY as modes. One on-die FS PHY (GPIO19/20 D-/D+) is shared
+    # by USB-OTG and USB Serial/JTAG; the six EXT/RCV pads are a single off-chip PHY interface
+    # (either controller, via EFUSE_USB_PHY_SEL). Dual USB_OTG_* / USB_* names are the same pads.
+    # Check currently always requires D-/D+ even when the assigned pins are the external PHY.
     assigned_pins: [USB_OTG_D-, USB_OTG_D+, USB_OTG_EXT_VP, USB_OTG_EXT_VM, USB_OTG_RCV, USB_OTG_EXT_OEN, USB_OTG_EXT_VPO, USB_OTG_EXT_VMO]
   USBSERIALJTAG:  # USB Serial/JTAG
     count: 1
-    assigned_pins: [USB_D-, USB_D+, USB_EXT_VP, USB_EXT_VM, USB_EXT_OEN, USB_EXT_VPO, USB_EXT_VMO]
+    # USB_EXT_* and USB_RCV are the same external PHY pads when Serial/JTAG is routed off-chip
+    assigned_pins: [USB_D-, USB_D+, USB_EXT_VP, USB_EXT_VM, USB_RCV, USB_EXT_OEN, USB_EXT_VPO, USB_EXT_VMO]
   LCDCAM:  # LCD and Camera Controller (LCD_CAM)
     count: 1
     subname: [LCD, CAM]
@@ -110,6 +116,7 @@ peripheral:
 
 # Note: PUP (wpu in datasheet) - pull up resistor enabled; PDOWN (wpd) - pull down resistor enabled
 # Note: USB_OTG_EXT_VMO and USB_EXT_VMO (and similar USB related functions which contains "OTG") are the same as without "OTG" part, split into two only for later resolution by the checker
+# Note: USB_OTG_RCV / USB_RCV and USB_*_EXT_* are for an external USB PHY; internal PHY uses GPIO19/20 (D-/D+) only
 gpio:
   0: {power_domain: VDD3P3_RTC, rtc: true, functions: [], strapping: High for SPI Boot; Low for Download Mode, at_reset: PUP}
   1: {power_domain: VDD3P3_RTC, rtc: true, functions: [TOUCH1, ADC1_CH0]}
@@ -132,7 +139,7 @@ gpio:
   18: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC2_CH7, U1RXD, CLK_OUT3]}
   19: {power_domain: VDD3P3_RTC, rtc: true, functions: [USB_OTG_D-, USB_D-, ADC2_CH8, U1RTS, CLK_OUT2]}
   20: {power_domain: VDD3P3_RTC, rtc: true, functions: [USB_OTG_D+, USB_D+, ADC2_CH9, U1CTS, CLK_OUT1]}
-  21: {power_domain: VDD3P3_RTC, rtc: true, functions: [USB_RCV]}
+  21: {power_domain: VDD3P3_RTC, rtc: true, functions: [USB_OTG_RCV, USB_RCV]}  # external USB PHY RCV
   26: {power_domain: VDD_SPI, functions: [SPICS1], at_reset: PUP}
   27: {power_domain: VDD_SPI, functions: [SPIHD], at_reset: PUP}
   28: {power_domain: VDD_SPI, functions: [SPIWP], at_reset: PUP}

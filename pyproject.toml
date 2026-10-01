@@ -42,7 +42,8 @@
 
 [tool.codespell]
     skip = 'tests/*'
-    ignore-words-list = ['emac']
+    # OEN is one of USB external PHY pads
+    ignore-words-list = ['emac', 'oen']
 
 [tool.ruff]
     line-length    = 120
