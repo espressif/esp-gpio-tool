@@ -201,13 +201,15 @@ Please note that only functions listed below are part of the public API and all 
 ```py
 # Get list of supported chips
 from esp_gpio_tool_cli.chip import SUPPORTED_CHIPS
-print(SUPPORTED_CHIPS) # This includes a list of names of chips without dash (e.g. esp32s3)
+
+print(SUPPORTED_CHIPS)  # This includes a list of names of chips without dash (e.g. esp32s3)
 
 from esp_gpio_tool_cli.chip import ESP
+
 # Create ESP class
-esp = ESP("esp32")
+esp = ESP('esp32')
 # Optionally set MPN of chip - some have missing pins or even some extra were added between revisions
-esp.set_soc("ESP32-PICO-D4")
+esp.set_soc('ESP32-PICO-D4')
 # To get all possible MPN run
 print(esp.soc_list)
 
@@ -222,7 +224,7 @@ gpio_list = [str(g) for g in esp.gpios.values()]
 # Get list of peripherals
 print(esp.peripherals)
 # Get all pins for e.g. ADC (the key here is class name in peripheral.py)
-print(esp.get_peripheral("ADC").all_pins)
+print(esp.get_peripheral('ADC').all_pins)
 ```
 
 ### Run Check
@@ -233,9 +235,9 @@ You can either run checker on already existing YAML filename or pass config as d
 from esp_gpio_tool_cli.checker import run_check
 
 config = {
-  "chip": "esp32",
-  0: "TOUCH1",
-  3: ["LEDC_HS_SIG_OUT0", "LEDC_HS_SIG_OUT1", "RMT_SIG_IN0"],
+    'chip': 'esp32',
+    0: 'TOUCH1',
+    3: ['LEDC_HS_SIG_OUT0', 'LEDC_HS_SIG_OUT1', 'RMT_SIG_IN0'],
 }
 out = run_check(config)
 # Output is provided as a list of messages
