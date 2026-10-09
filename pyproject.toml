@@ -1,6 +1,6 @@
 [build-system]
     build-backend = "setuptools.build_meta"
-    requires      = ["setuptools>=64"]
+    requires      = ["setuptools>=77"]
 
 [project]
     authors = [
@@ -9,7 +9,8 @@
     classifiers = ["Programming Language :: Python :: 3"]
     description = "ESP GPIO Tool"
     dynamic = ["version"]
-    license = { file = "LICENSE" }
+    license = "Apache-2.0"
+    license-files = ["LICENSE"]
     name = "esp-gpio-tool"
     readme = "README.md"
     requires-python = ">=3.10"
