@@ -1,0 +1,123 @@
+# SPDX-FileCopyrightText: 2026 Community scaffold (not Espressif)
+# SPDX-License-Identifier: Apache-2.0
+#
+# Community scaffold for esp-gpio-tool; not official Espressif.
+# Modeled on esp32c6.yaml. Sources: ESP32-C61 Series Datasheet v1.1,
+# ESP-IDF soc/esp32c61/soc_caps.h, ESP-IDF GPIO docs.
+# VERIFY items documented in esp32c61-target-notes.md.
+
+features:
+  cpu:
+    cores:
+      count: 1
+      max_freq_mhz: 160
+  memory:
+    internal:
+      sram_kb: 320
+      # VERIFY: datasheet lists 320 KB SRAM; no separate LP-SRAM size published like C6's 16 KB
+      lp_sram_kb: 0
+  connectivity:
+    wifi:
+      supported: true
+      standard: 802.11b/g/n/ax (2.4 GHz Wi-Fi 6)
+      max_data_rate_mbps: 150
+    bluetooth:
+      supported: true
+      version: BLE 5 (Bluetooth Core 6.0 certified)
+    ieee_802154:
+      supported: false
+    ethernet:
+      mac: false
+    usb:
+      otg_fs_2_0: false
+      usb_serial_jtag: true
+    sdio:
+      slave_2_0: true
+
+peripheral:
+  ADC:
+    count: 1
+    channels: 4
+    assigned_pins: ['ADC{count}_CH{{channel}}']
+  UART:
+    count: 3
+    assigned_pins: [U0TXD, U0RXD]
+    universal_pins: [U1TXD, U1RXD, U2TXD, U2RXD, 'U{count}CTS', 'U{count}RTS', 'U{count}DTR', 'U{count}DSR']
+  JTAG:
+    count: 1
+    assigned_pins: [MTCK, MTDO, MTMS, MTDI]
+  I2C:
+    count: 1
+    universal_pins: ['I2C{count}_SCL', 'I2C{count}_SDA']
+  I2S:
+    count: 1
+    # VERIFY: IO MUX signal names for I2S not fully tabulated in public DS pinmux summary; matrix-routable
+    universal_pins: ['I2S{count}_WS', 'I2S{count}_SDA', 'I2S{count}_CLK']
+  SPI:
+    # SPI0/SPI1 share flash/PSRAM bus (subname SPI); SPI2 = FSPI user SPI
+    count: 2
+    subname: [SPI, FSPI]
+    modes: [Single SPI, Dual SPI, Quad SPI, QPI]
+    assigned_pins: ['{subname}CLK', '{subname}Q', '{subname}D', '{subname}HD', '{subname}WP', '{subname}CS0', SPICS1]
+    # FSPICS1–5: datasheet §4.2.1.2 — GPIO matrix only (six CS total including FSPICS0)
+    universal_pins: [FSPICS1, FSPICS2, FSPICS3, FSPICS4, FSPICS5]
+  SDIO:
+    count: 1
+    assigned_pins: ['SDIO{count}_CLK', 'SDIO{count}_CMD', 'SDIO{count}_DATA{{data_width}}']
+    data_width: {'0': [1, 4]}
+  LEDC:  # LED PWM
+    count: 1
+    channels: 6
+    universal_pins: ['LEDC_LS_SIG_OUT{channel}']
+  USBSERIALJTAG:  # USB Serial/JTAG
+    count: 1
+    assigned_pins: [USB_D-, USB_D+]
+  XTAL32K:  # external 32K crystal oscillator
+    count: 1
+    assigned_pins: [XTAL_32K_P, XTAL_32K_N]
+  ANACOMP:  # Analog PAD Voltage Comparator / Zero Crossing Detector (ZCD0/ZCD1)
+    count: 1
+    assigned_pins: [ANA_COMP0_PAD0, ANA_COMP0_PAD1]
+
+# Note: PUP (wpu in datasheet) - pull up resistor enabled; PDOWN - pull down resistor enabled
+# GPIO0–GPIO29 = 30 physical GPIOs (ESP-IDF / datasheet). LP IO MUX: GPIO0–GPIO6.
+gpio:
+  0: {power_domain: VDDPST1, lp: true, functions: [XTAL_32K_P]}
+  1: {power_domain: VDDPST1, lp: true, functions: [XTAL_32K_N, ADC1_CH0]}
+  2: {power_domain: VDDPST1, lp: true, functions: [FSPIQ]}
+  3: {power_domain: VDDPST1, lp: true, functions: [MTMS, FSPIHD, ADC1_CH1], strapping: Control SDIO sampling on rising (pin high) / falling (low) edge (MTMS).}
+  4: {power_domain: VDDPST1, lp: true, functions: [MTDI, FSPIWP, ADC1_CH2], strapping: Control SDIO output on rising (pin high) / falling (low) edge (MTDI).}
+  5: {power_domain: VDDPST1, lp: true, functions: [MTCK, ADC1_CH3]}
+  6: {power_domain: VDDPST1, lp: true, functions: [MTDO, FSPICLK]}
+  7: {power_domain: VDDPST2, functions: [FSPID], strapping: JTAG signal source select}
+  8: {power_domain: VDDPST2, functions: [FSPICS0, ANA_COMP0_PAD0], strapping: Must be high for Joint Download Boot (with GPIO9 low); also ROM UART print control when eFuse allows}
+  9: {power_domain: VDDPST2, functions: [ANA_COMP0_PAD1], strapping: High for SPI Boot; Low for Download Mode, at_reset: PUP}
+  10: {power_domain: VDDPST2, functions: [U0RXD]}
+  11: {power_domain: VDDPST2, functions: [U0TXD]}
+  12: {power_domain: VDDPST2, functions: [USB_D-]}
+  13: {power_domain: VDDPST2, functions: [USB_D+]}
+  14: {power_domain: VDD_SPI/VDDPST2, functions: [SPICS1]}
+  15: {power_domain: VDD_SPI/VDDPST2, functions: [SPICS0]}
+  16: {power_domain: VDD_SPI/VDDPST2, functions: [SPIQ]}
+  17: {power_domain: VDD_SPI/VDDPST2, functions: [SPIWP]}
+  18: {power_domain: VDDPST2, functions: []}  # VDD_SPI power pad / GPIO18; digital use restricted when powering flash/PSRAM
+  19: {power_domain: VDD_SPI/VDDPST2, functions: [SPIHD]}
+  20: {power_domain: VDD_SPI/VDDPST2, functions: [SPICLK]}
+  21: {power_domain: VDD_SPI/VDDPST2, functions: [SPID]}
+  22: {power_domain: VDDPST2, functions: [SDIO0_DATA2]}
+  23: {power_domain: VDDPST2, functions: [SDIO0_DATA3]}
+  24: {power_domain: VDDPST2, functions: []}
+  25: {power_domain: VDDPST2, functions: [SDIO0_CMD]}
+  26: {power_domain: VDDPST2, functions: [SDIO0_CLK]}
+  27: {power_domain: VDDPST2, functions: [SDIO0_DATA0]}
+  28: {power_domain: VDDPST2, functions: [SDIO0_DATA1]}
+  29: {power_domain: VDDPST2, functions: []}
+
+soc:
+  # In-package flash 4 MB Quad SPI — SPI flash balls are NC (datasheet notice)
+  ESP32-C61HF4: {not_connected: [15, 16, 17, 18, 19, 20, 21]}
+  # In-package PSRAM (2 MB / 8 MB); off-package flash supported — treat SPI0/1 set as reserved
+  ESP32-C61HR2: {reserved_pins: [14, 15, 16, 17, 19, 20, 21]}  # VERIFY: confirm SPICS1/GPIO14 + VDD_SPI/GPIO18 handling vs board design
+  ESP32-C61HR8: {reserved_pins: [14, 15, 16, 17, 19, 20, 21]}  # VERIFY: same as HR2
+  # LGA: in-package flash 8 MB + PSRAM 8 MB — SPI balls NC including SPICS1
+  ESP32-C61NF8R8LA: {not_connected: [14, 15, 16, 17, 18, 19, 20, 21]}
